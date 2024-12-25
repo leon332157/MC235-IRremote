@@ -1,0 +1,15 @@
+16 13 mute
+16 16 vol up
+16 17 vol down
+17 12 power
+20 12 power
+20 45 open/close
+20 32 next
+20 33 prev
+20 54 STOP
+16 70 DBB rc5x msg
+20 28 shuffle
+1001 0000
+1011 1111 1111
+
+16 79 DSC rc5x
