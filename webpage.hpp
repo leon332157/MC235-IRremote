@@ -1,4 +1,4 @@
-const char INDEX[] = R""""(
+const char INDEX[] = R"""(
 <html>
 
 <head>IR Remote</head>
@@ -8,9 +8,9 @@ const char INDEX[] = R""""(
     <h2>IP Addr: %s</h2>
     <h3>msg: %s</h3>
     <script>
-        function sendCode(code) {
+        function sendIRReq(code) {
             fetch('/ir?code=' + code)
-                .then(response => {console.log(response);console.log(response.text())})
+                .then(response => console.log(response))
         }
     </script>
     <style>
@@ -138,4 +138,4 @@ const char INDEX[] = R""""(
 </body>
 
 </html>
-)"""";
+)""";
