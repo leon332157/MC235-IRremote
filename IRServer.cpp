@@ -39,7 +39,7 @@ inline void blinkLED(uint8_t pin, uint16_t time_ms) {
 static char send_buf[4096] = { 0 };
 void handleRoot() {
   digitalWrite(BLUE,1);
-  sprintf(send_buf, INDEX, WiFi.localIP().toString().c_str(),"");
+  snprintf(send_buf,sizeof send_buf, INDEX, WiFi.localIP().toString().c_str(),"");
   server.send(200, "text/html", send_buf);
   digitalWrite(BLUE,0);
 }
@@ -58,9 +58,9 @@ void handleIr() {
   }
   irsend.sendRC5(msg);
   char temp[16];
-  sprintf(temp, "Sent: %x", msg);
+  snprintf(temp,sizeof temp, "Sent: %x", msg);
   //sprintf(send_buf, PAGE, WiFi.localIP().toString().c_str(),temp);
-  server.send(200, "text/html", String(send_buf));
+  server.send(200, "text/html", send_buf);
   digitalWrite(BLUE, 0);
 }
 
@@ -69,14 +69,15 @@ void handleRC5X() {
   bool release = false;
   if (!server.hasArg("dev")) {
     server.send(401, "text/plain", "missing ?dev=");
+    return;
   }
   if (!server.hasArg("code")) {
     server.send(401, "text/plain", "missing ?code=");
+    return;
   }
   if (server.hasArg("release")) {
     release = true;
   }
-
 
   uint16_t dev = server.arg(0).toInt();
   uint64_t code = server.arg(1).toInt();
@@ -84,7 +85,7 @@ void handleRC5X() {
   uint16_t msg = irsend.encodeRC5X(dev, code, release);
   irsend.sendRC5(msg);
   char temp[16] = { 0 };
-  snprintf(temp,16, "Sent: %x", msg);
+  snprintf(temp,sizeof temp, "Sent: %x", msg);
   server.send(200, "text/plain", temp);
   digitalWrite(BLUE,0);
 }
@@ -94,9 +95,11 @@ void handleRC5() {
   bool release = false;
   if (!server.hasArg("dev")) {
     server.send(401, "text/plain", "missing ?dev=");
+    return;
   }
   if (!server.hasArg("code")) {
     server.send(401, "text/plain", "missing ?code=");
+    return;
   }
   if (server.hasArg("release")) {
     release = true;
@@ -167,19 +170,6 @@ void setup(void) {
     irsend.sendRC5(msg);
     delay(3000);
   }
-
-  /*
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(WiFi.SSID()  );
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP().toString());
-  */
   if (mdns.begin(HOSTNAME)) {
     Serial.println("MDNS responder started");
     // Announce http tcp service on port 80
