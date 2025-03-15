@@ -7,10 +7,21 @@ const char INDEX[] = R"""(
     <h1>IR Remote</h1>
     <h2>IP Addr: %s</h2>
     <h3>msg: %s</h3>
+    <p id="msg"></p>
     <script>
+        const msg = document.getElementById("msg");
         function sendIRReq(code) {
             fetch('/ir?code=' + code)
-                .then(response => console.log(response))
+                .then(response => {
+                    console.log(response);
+                    msg.innerHTML = "Response: " + response.status;
+                })
+        }
+
+        function sendCode(code) {
+            console.log("Sending code: " + code);
+            msg.innerHTML = "Sending code: " + code;
+            sendIRReq(code);
         }
     </script>
     <style>
@@ -112,7 +123,8 @@ const char INDEX[] = R"""(
     </style>
     <div class="parent">
         <div class="div1">
-            <button onclick="sendCode(12)">Power</button> </div>
+            <button onclick="sendCode(12)">Power</button>
+        </div>
         <div class="div2"> <button onclick="sendCode(45)">Open/Close</button> </div>
         <div class="div3"> <button onclick="sendCode(63)">Source</button> </div>
         <div class="div4"> <button onclick="sendCode(70)">DBB</button> </div>
@@ -132,7 +144,7 @@ const char INDEX[] = R"""(
         <div class="div18"> <button onclick="sendCode(42)">Set Clock</button> </div>
         <div class="div19"> <button onclick="sendCode(89)">Timer</button> </div>
         <div class="div20"> <button onclick="sendCode(38)">Sleep</button> </div>
-        <div class="div21"> </div>
+        <div class="div21"><button onclick="sendCode(79)">DSC</button> </div>
         <div class="div22"> </div>
     </div>
 </body>
