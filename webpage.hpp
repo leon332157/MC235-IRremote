@@ -14,7 +14,54 @@ const char INDEX[] = R"""(
             fetch('/ir?code=' + code)
                 .then(response => {
                     console.log(response);
-                    msg.innerHTML = "Response: " + response.status;
+                    if (response.status == 200) {
+                        response.text()
+                            .then(text => {
+                                console.log(text);
+                                msg.innerHTML = "Response: " + text;
+                            })
+                    }
+                    else {
+                        msg.innerHTML = "Error: " + response.status;
+                    }
+                })
+        }
+
+        function sendRC5(dev, code) {
+            console.log("Sending RC5 code: " + dev + " " + code);
+            msg.innerHTML = "Sending RC5 code: " + dev + " " + code;
+            fetch('/rc5?dev=' + dev + '&code=' + code)
+                .then(response => {
+                    console.log(response);
+                    if (response.status == 200) {
+                        response.text()
+                            .then(text => {
+                                console.log(text);
+                                msg.innerHTML = "Response: " + text;
+                            })
+                    }
+                    else {
+                        msg.innerHTML = "Error: " + response.status;
+                    }
+                })
+        }
+
+        function sendRC5X(dev, code) {
+            console.log("Sending RC5X code: " + dev + " " + code);
+            msg.innerHTML = "Sending RC5X code: " + dev + " " + code;
+            fetch('/rc5x?dev=' + dev + '&code=' + code)
+                .then(response => {
+                    console.log(response);
+                    if (response.status == 200) {
+                        response.text()
+                            .then(text => {
+                                console.log(text);
+                                msg.innerHTML = "Response: " + text;
+                            })
+                    }
+                    else {
+                        msg.innerHTML = "Error: " + response.status;
+                    }
                 })
         }
 
@@ -23,6 +70,7 @@ const char INDEX[] = R"""(
             msg.innerHTML = "Sending code: " + code;
             sendIRReq(code);
         }
+
     </script>
     <style>
         .parent {
@@ -131,10 +179,10 @@ const char INDEX[] = R"""(
         <div class="div5"> <button onclick="sendCode(36)">Program</button> </div>
         <div class="div6"> <button onclick="sendCode(29)">Repeat</button> </div>
         <div class="div7"> <button onclick="sendCode(28)">Shuffle</button> </div>
-        <div class="div8"> <button onclick="sendCode(53)">Play</button> </div>
-        <div class="div9"> <button onclick="sendCode(16)">Volume Up</button> </div>
-        <div class="div10"> <button onclick="sendCode(17)">Volume Down</button> </div>
-        <div class="div11"> <button onclick="sendCode(13)">Mute</button> </div>
+        <div class="div8"> <button onclick="sendCode(53)">Play/Pause</button> </div>
+        <div class="div9"> <button onclick="sendRC5(16,16)">Volume Up</button> </div>
+        <div class="div10"> <button onclick="sendRC5(16,17)">Volume Down</button> </div>
+        <div class="div11"> <button onclick="sendRC5(16,13)">Mute</button> </div>
         <div class="div12"> <button onclick="sendCode(15)">RDS</button> </div>
         <div class="div13"> <button onclick="sendCode(52)">Fast Forward</button> </div>
         <div class="div14"> <button onclick="sendCode(50)">Rewind</button> </div>

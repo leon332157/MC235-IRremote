@@ -25,7 +25,9 @@ IRsend irsend(IRLed); // Set the GPIO to be used to sending the message.
 #define RED 14
 #define GREEN 12
 #define BLUE 13
-#define PRINTLN(x) if (USE_SERIAL) Serial.println(x)
+#define PRINTLN(x)  \
+    if (USE_SERIAL) \
+    Serial.println(x)
 
 inline void blinkLED(uint8_t pin, uint16_t time_ms) {
     digitalWrite(pin, 1);
@@ -35,7 +37,7 @@ inline void blinkLED(uint8_t pin, uint16_t time_ms) {
     delay(time_ms);
 }
 
-static char send_buf[4096] = { 0 };
+static char send_buf[10000] = { 0 };
 void handleRoot() {
     digitalWrite(GREEN, 1);
     snprintf(send_buf, sizeof send_buf, INDEX, WiFi.localIP().toString().c_str(), "");
@@ -59,7 +61,7 @@ void handleIr() {
     char temp[16];
     snprintf(temp, sizeof temp, "Sent: %x", msg);
     // sprintf(send_buf, PAGE, WiFi.localIP().toString().c_str(),temp);
-    server.send(200, "text/html", send_buf);
+    server.send(200, "text/html", temp);
     digitalWrite(GREEN, 0);
 }
 
@@ -200,14 +202,15 @@ const long interval = 6000;
 void loop(void) {
     mdns.update();
     server.handleClient();
-    if (millis() - prev > interval) {
-        prev = millis();
-        blinkLED(GREEN, 50);
-        // Serial.println("loop");
-    }
     if (WifiMulti.run(3000) != WL_CONNECTED) {
         blinkLED(RED, 500);
         PRINTLN("WiFi not connected");
+    } else {
+        if (millis() - prev > interval) {
+            prev = millis();
+            blinkLED(BLUE, 20);
+            // Serial.println("loop");
+        }
     }
-    //Serial.printf("Wifi IP: %s\n", WiFi.localIP().toString().c_str());
+    // Serial.printf("Wifi IP: %s\n", WiFi.localIP().toString().c_str());
 }
