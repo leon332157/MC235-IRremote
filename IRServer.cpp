@@ -9,7 +9,6 @@
 #include "password.hpp"
 #include "webpage.hpp"
 
-#define NUM_CMD 20
 #define USE_SERIAL 0
 
 MDNSResponder mdns;
@@ -63,6 +62,25 @@ void handleIr() {
     // sprintf(send_buf, PAGE, WiFi.localIP().toString().c_str(),temp);
     server.send(200, "text/html", temp);
     digitalWrite(GREEN, 0);
+}
+
+void handleNEC() {
+    digitalWrite(GREEN,1);
+    if (!server.hasArg("dev")) {
+        server.send(401, "text/plain", "missing ?dev=");
+    }
+    // device(address) 121/0x79
+    if (!server.hasArg("code")) {
+        server.send(401, "text/plain", "missing ?code=");
+    }
+    long dev = server.arg(0).toInt();
+    long code = server.arg(1).toInt();
+    uint32_t msg = irsend.encodeNEC(dev, code);
+    irsend.sendNEC(msg);
+     char temp[16];
+    snprintf(temp, sizeof temp, "Sent: %x", msg);
+    server.send(200, "text/plain", temp);
+    digitalWrite(GREEN,0);
 }
 
 void handleRC5X() {
@@ -187,6 +205,7 @@ void setup(void) {
     blinkLED(GREEN, 500);
     delay(500);
     server.on("/", HTTP_GET, handleRoot);
+    server.on("/nec", HTTP_GET, handleNEC);
     server.on("/ir", HTTP_GET, handleIr);
     server.on("/rc5x", HTTP_GET, handleRC5X);
     server.on("/rc5", HTTP_GET, handleRC5);
@@ -197,7 +216,7 @@ void setup(void) {
 }
 
 unsigned long prev = 0;
-const long interval = 6000;
+const unsigned long interval = 8000;
 
 void loop(void) {
     mdns.update();
@@ -209,6 +228,10 @@ void loop(void) {
         if (millis() - prev > interval) {
             prev = millis();
             blinkLED(BLUE, 20);
+            if (USE_SERIAL){
+                PRINTLN("WiFi connected");
+                PRINTLN(WiFi.localIP());
+            }
             // Serial.println("loop");
         }
     }
