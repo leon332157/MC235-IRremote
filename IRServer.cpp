@@ -10,6 +10,7 @@
 #include "webpage.hpp"
 
 #define USE_SERIAL 0
+#define USE_BEACON 0
 
 MDNSResponder mdns;
 ESP8266WiFiMulti WifiMulti;
@@ -65,22 +66,24 @@ void handleIr() {
 }
 
 void handleNEC() {
-    digitalWrite(GREEN,1);
+    digitalWrite(GREEN, 1);
     if (!server.hasArg("dev")) {
         server.send(401, "text/plain", "missing ?dev=");
+        return;
     }
     // device(address) 121/0x79
     if (!server.hasArg("code")) {
         server.send(401, "text/plain", "missing ?code=");
+        return;
     }
     long dev = server.arg(0).toInt();
     long code = server.arg(1).toInt();
     uint32_t msg = irsend.encodeNEC(dev, code);
     irsend.sendNEC(msg);
-     char temp[16];
+    char temp[16];
     snprintf(temp, sizeof temp, "Sent: %x", msg);
     server.send(200, "text/plain", temp);
-    digitalWrite(GREEN,0);
+    digitalWrite(GREEN, 0);
 }
 
 void handleRC5X() {
@@ -225,14 +228,16 @@ void loop(void) {
         blinkLED(RED, 500);
         PRINTLN("WiFi not connected");
     } else {
-        if (millis() - prev > interval) {
-            prev = millis();
-            blinkLED(BLUE, 20);
-            if (USE_SERIAL){
-                PRINTLN("WiFi connected");
-                PRINTLN(WiFi.localIP());
+        if (USE_BEACON) {
+            if (millis() - prev > interval) {
+                prev = millis();
+                blinkLED(BLUE, 20);
+                if (USE_SERIAL) {
+                    PRINTLN("WiFi connected");
+                    PRINTLN(WiFi.localIP());
+                }
+                // Serial.println("loop");
             }
-            // Serial.println("loop");
         }
     }
     // Serial.printf("Wifi IP: %s\n", WiFi.localIP().toString().c_str());
