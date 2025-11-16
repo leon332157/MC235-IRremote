@@ -1,201 +1,226 @@
 const char INDEX[] = R"""(
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>IR Remote</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --text: #e7eaf0;
+      --muted: #9aa3b2;
+      --primary: #3b82f6;
+      --primary-press: #2563eb;
+      --accent: #22c55e;
+      --danger: #ef4444;
+      --border: #232938;
+      --shadow: 0 6px 16px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
 
-<head>IR Remote</head>
+    * { box-sizing: border-box; }
 
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, #111522 0%, #0f1115 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px env(safe-area-inset-top);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 14px 12px 24px;
+    }
+
+    .status {
+      margin: 10px 0 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      box-shadow: var(--shadow);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .row {
+      display: contents;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+      height: 58px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #1a2030;
+      color: var(--text);
+      font-size: 0.98rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      transition: transform 0.06s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: var(--shadow);
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn.primary { background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%); border-color: #1e40af; }
+    .btn.accent { background: linear-gradient(180deg, #16a34a 0%, #15803d 100%); border-color: #146c38; }
+    .btn.warning { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); border-color: #b45309; }
+    .btn.danger { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); border-color: #b91c1c; }
+    .btn.ghost { background: #1a2030; }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .group-label {
+      grid-column: 1 / -1;
+      margin-top: 6px;
+      margin-bottom: -2px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+      padding: 0 2px;
+    }
+
+    @media (max-width: 480px) {
+      .btn { height: 64px; font-size: 1rem; }
+      .grid { gap: 8px; grid-template-columns: repeat(2, 1fr); }
+      main { padding: 10px 8px 18px; }
+    }
+  </style>
+</head>
 <body>
-    <h1>IR Remote</h1>
-    <h2>IP Addr: %s</h2>
-    <h3>msg: %s</h3>
-    <p id="msg"></p>
-    <script>
-        const msg = document.getElementById("msg");
-        function sendIRReq(code) {
-            fetch('/ir?code=' + code)
-                .then(response => {
-                    console.log(response);
-                    if (response.status == 200) {
-                        response.text()
-                            .then(text => {
-                                console.log(text);
-                                msg.innerHTML = "Response: " + text;
-                            })
-                    }
-                    else {
-                        msg.innerHTML = "Error: " + response.status;
-                    }
-                })
-        }
+  <header>
+    <h1 class="title">IR Remote</h1>
+    <div class="sub">IP Addr: %s</div>
+  </header>
 
-        function sendRC5(dev, code) {
-            console.log("Sending RC5 code: " + dev + " " + code);
-            msg.innerHTML = "Sending RC5 code: " + dev + " " + code;
-            fetch('/rc5?dev=' + dev + '&code=' + code)
-                .then(response => {
-                    console.log(response);
-                    if (response.status == 200) {
-                        response.text()
-                            .then(text => {
-                                console.log(text);
-                                msg.innerHTML = "Response: " + text;
-                            })
-                    }
-                    else {
-                        msg.innerHTML = "Error: " + response.status;
-                    }
-                })
-        }
+  <main>
+    <div id="msg" class="status" aria-live="polite">Ready</div>
 
-        function sendRC5X(dev, code) {
-            console.log("Sending RC5X code: " + dev + " " + code);
-            msg.innerHTML = "Sending RC5X code: " + dev + " " + code;
-            fetch('/rc5x?dev=' + dev + '&code=' + code)
-                .then(response => {
-                    console.log(response);
-                    if (response.status == 200) {
-                        response.text()
-                            .then(text => {
-                                console.log(text);
-                                msg.innerHTML = "Response: " + text;
-                            })
-                    }
-                    else {
-                        msg.innerHTML = "Error: " + response.status;
-                    }
-                })
-        }
+    <div class="grid" id="remote">
 
-        function sendCode(code) {
-            console.log("Sending code: " + code);
-            msg.innerHTML = "Sending code: " + code;
-            sendIRReq(code);
-        }
+      <div class="group-label">Power</div>
+      <button class="btn danger" onclick="sendCode(12)">Power</button>
+      <button class="btn ghost" onclick="sendCode(45)">Open/Close</button>
 
-    </script>
-    <style>
-        .parent {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            grid-column-gap: 0px;
-            grid-row-gap: 0px;
-        }
+      <div class="group-label">Sources & Modes</div>
+      <button class="btn ghost" onclick="sendCode(70)">DBB</button>
+      <button class="btn ghost" onclick="sendCode(36)">Program</button>
+      <button class="btn ghost" onclick="sendCode(29)">Repeat</button>
+      <button class="btn ghost" onclick="sendCode(28)">Shuffle</button>
 
-        .div1 {
-            grid-area: 1 / 1 / 2 / 2;
-        }
+      <div class="group-label">Transport</div>
 
-        .div2 {
-            grid-area: 1 / 2 / 2 / 3;
-        }
+      <button class="btn accent" onclick="sendCode(53)">⏯ Play/Pause</button>
+      <button class="btn danger" onclick="sendCode(54)">⏹ Stop</button>
+      <button class="btn ghost" onclick="sendCode(33)">⏮ Previous</button>
+      <button class="btn ghost" onclick="sendCode(32)">⏭ Next</button>
+      <button class="btn ghost" onclick="sendCode(50)">⏪ Rewind</button>
+      <button class="btn ghost" onclick="sendCode(52)">⏩ Fast Forward</button>
 
-        .div3 {
-            grid-area: 2 / 1 / 3 / 2;
-        }
+      <div class="group-label">Volume</div>
+      <button class="btn ghost" onclick="sendRC5(16,17)">🔉 Volume Down</button>
+      <button class="btn primary" onclick="sendRC5(16,13)">🔇 Mute</button>
+      <button class="btn ghost" onclick="sendRC5(16,16)">🔊 Volume Up</button>
 
-        .div4 {
-            grid-area: 2 / 2 / 3 / 3;
-        }
-
-        .div5 {
-            grid-area: 2 / 3 / 3 / 4;
-        }
-
-        .div6 {
-            grid-area: 2 / 4 / 3 / 5;
-        }
-
-        .div7 {
-            grid-area: 2 / 5 / 3 / 6;
-        }
-
-        .div8 {
-            grid-area: 3 / 5 / 4 / 6;
-        }
-
-        .div9 {
-            grid-area: 3 / 4 / 4 / 5;
-        }
-
-        .div10 {
-            grid-area: 3 / 3 / 4 / 4;
-        }
-
-        .div11 {
-            grid-area: 3 / 2 / 4 / 3;
-        }
-
-        .div12 {
-            grid-area: 3 / 1 / 4 / 2;
-        }
-
-        .div13 {
-            grid-area: 4 / 1 / 5 / 2;
-        }
-
-        .div14 {
-            grid-area: 4 / 2 / 5 / 3;
-        }
-
-        .div15 {
-            grid-area: 4 / 3 / 5 / 4;
-        }
-
-        .div16 {
-            grid-area: 4 / 4 / 5 / 5;
-        }
-
-        .div17 {
-            grid-area: 4 / 5 / 5 / 6;
-        }
-
-        .div18 {
-            grid-area: 5 / 5 / 6 / 6;
-        }
-
-        .div19 {
-            grid-area: 5 / 4 / 6 / 5;
-        }
-
-        .div20 {
-            grid-area: 5 / 3 / 6 / 4;
-        }
-
-        .div21 {
-            grid-area: 5 / 2 / 6 / 3;
-        }
-
-        .div22 {
-            grid-area: 5 / 1 / 6 / 2;
-        }
-    </style>
-    <div class="parent">
-        <div class="div1">
-            <button onclick="sendCode(12)">Power</button>
-        </div>
-        <div class="div2"> <button onclick="sendCode(45)">Open/Close</button> </div>
-        <div class="div3"> <button onclick="sendCode(63)">Source</button> </div>
-        <div class="div4"> <button onclick="sendCode(70)">DBB</button> </div>
-        <div class="div5"> <button onclick="sendCode(36)">Program</button> </div>
-        <div class="div6"> <button onclick="sendCode(29)">Repeat</button> </div>
-        <div class="div7"> <button onclick="sendCode(28)">Shuffle</button> </div>
-        <div class="div8"> <button onclick="sendCode(53)">Play/Pause</button> </div>
-        <div class="div9"> <button onclick="sendRC5(16,16)">Volume Up</button> </div>
-        <div class="div10"> <button onclick="sendRC5(16,17)">Volume Down</button> </div>
-        <div class="div11"> <button onclick="sendRC5(16,13)">Mute</button> </div>
-        <div class="div12"> <button onclick="sendCode(15)">RDS</button> </div>
-        <div class="div13"> <button onclick="sendCode(52)">Fast Forward</button> </div>
-        <div class="div14"> <button onclick="sendCode(50)">Rewind</button> </div>
-        <div class="div15"> <button onclick="sendCode(33)">Previous</button> </div>
-        <div class="div16"> <button onclick="sendCode(32)">Next</button> </div>
-        <div class="div17"> <button onclick="sendCode(54)">Stop</button> </div>
-        <div class="div18"> <button onclick="sendCode(42)">Set Clock</button> </div>
-        <div class="div19"> <button onclick="sendCode(89)">Timer</button> </div>
-        <div class="div20"> <button onclick="sendCode(38)">Sleep</button> </div>
-        <div class="div21"><button onclick="sendCode(79)">DSC</button> </div>
-        <div class="div22"> </div>
+      <div class="group-label">Other</div>
+      <button class="btn ghost" onclick="sendCode(15)">RDS</button>
+      <button class="btn ghost" onclick="sendCode(79)">DSC</button>
+      <button class="btn ghost" onclick="sendCode(38)">Sleep</button>
+      <button class="btn ghost" onclick="sendCode(89)">Timer</button>
+      <button class="btn ghost" onclick="sendCode(42)">Set Clock</button>
     </div>
-</body>
+  </main>
 
+  <script>
+    const msgEl = document.getElementById("msg");
+
+    function setMsg(text, isError = false) {
+      msgEl.textContent = text;
+      msgEl.style.color = isError ? "#fecaca" : "var(--muted)";
+      msgEl.style.borderColor = isError ? "#7f1d1d" : "var(--border)";
+      msgEl.style.background = isError ? "#1f1414" : "var(--panel)";
+    }
+
+    async function doFetch(url) {
+      try {
+        const res = await fetch(url, { method: "GET" });
+        if (!res.ok) {
+          setMsg("Error: " + res.status + " " + res.statusText, true);
+          return;
+        }
+        const text = await res.text();
+        setMsg("Response: " + text);
+      } catch (e) {
+        setMsg("Network error: " + (e?.message || e), true);
+      }
+    }
+
+    function sendIRReq(code) {
+      setMsg("Sending code: " + code + " ...");
+      doFetch("/ir?code=" + encodeURIComponent(code));
+    }
+
+    function sendRC5(dev, code) {
+      setMsg("Sending RC5 " + dev + ":" + code + " ...");
+      doFetch("/rc5?dev=" + encodeURIComponent(dev) + "&code=" + encodeURIComponent(code));
+    }
+
+    function sendRC5X(dev, code) {
+      setMsg("Sending RC5X " + dev + ":" + code + " ...");
+      doFetch("/rc5x?dev=" + encodeURIComponent(dev) + "&code=" + encodeURIComponent(code));
+    }
+
+    function sendCode(code) {
+      sendIRReq(code);
+    }
+  </script>
+</body>
 </html>
 )""";
